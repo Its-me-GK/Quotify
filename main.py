@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-with open('Quotify/config.json','r') as c:
+with open('config.json','r') as c: #Quotify/config.json
     params = json.load(c)["params"] #loading the params in the variable 
 
 app = Flask(__name__)
