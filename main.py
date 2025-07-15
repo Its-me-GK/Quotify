@@ -193,4 +193,12 @@ def remove_session():
     session.pop('user')
     return redirect("/dashboard")
 
-app.run(debug=True)
+# --- CRITICAL CHANGE: Only run app.run(debug=True) locally ---
+if __name__ == '__main__':
+    # This block will ONLY run when you execute `python main.py` directly on your local machine.
+    # Vercel's serverless environment will not execute this part when deploying or serving.
+    with app.app_context():
+        print("Attempting to create database tables (if not exist) locally...")
+        db.create_all() # This creates tables for your local development database
+        print("Database tables creation process completed locally.")
+    app.run(debug=True) # This starts the Flask development server with debug mode locally
