@@ -1,0 +1,10 @@
+{
+    "params":{
+        "local_server":"False",
+        "blog_name":"Quotify",
+        "tagline":"The Life Mantra!",
+        "about_text":"This is content should be updated later as this blogs belongs to Shayari, Quotes and Some Life lessons",
+        "no_of_posts": 2,
+        "login_img": "login.png"
+    }
+}

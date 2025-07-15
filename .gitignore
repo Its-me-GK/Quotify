@@ -1,4 +1,3 @@
-config.json
 envforFlask
 *.pyc
 __pycache__

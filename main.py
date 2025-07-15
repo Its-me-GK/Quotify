@@ -6,15 +6,16 @@ from flask_mail import Mail
 import os
 import math
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 
+load_dotenv()
 
 with open('Quotify/config.json','r') as c:
     params = json.load(c)["params"] #loading the params in the variable 
 
 app = Flask(__name__)
-params['no_of_posts'] = 2
 app.secret_key = "secret-key-here"
-app.config['UPLOAD_FOLDER'] = params['upload_location']
+app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER')
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'connect_args': {
         'ssl': {
@@ -37,15 +38,15 @@ app.config.update(
     MAIL_SERVER = 'smtp.gmail.com',
     MAIL_PORT = '465',
     MAIL_USE_SSL = True,
-    MAIL_USERNAME = params['g-user'],
-    MAIL_PASSWORD = params['g-pass']
+    MAIL_USERNAME = os.environ.get('GMAIL_USER'),
+    MAIL_PASSWORD = os.environ.get('GMAIL_PASSWORD')
 )
 mail = Mail(app)
 
 if(params['local_server']== "True" ):
-    app.config['SQLALCHEMY_DATABASE_URI'] = params['local_uri']
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('LOCAL_URL')
 else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = params['prod_uri']
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('PRODUCTION_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
 
@@ -108,7 +109,7 @@ def contact():
         mail.send_message(
             'New message from ' + name,
             sender = email,
-            recipients =[params['g-user']], 
+            recipients =[os.environ.get('GMAIL_USER')], 
             body = msg + '\n' +phone,
     )
     return render_template('contact.html',params=params)
@@ -120,7 +121,7 @@ def about():
 
 @app.route("/uploader", methods=['GET','POST'])
 def upload():
-    if('user' in session and session['user'] == params['admin_user']):
+    if('user' in session and session['user'] == os.environ.get('ADMIN_USERNAME')):
         if request.method == 'POST':
             file = request.files['file1']
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(file.filename)))
@@ -128,7 +129,7 @@ def upload():
 
 @app.route("/edit/<string:srno>", methods = ['GET', 'POST'])
 def edit_post(srno):
-    if('user' in session and session['user'] == params['admin_user']):
+    if('user' in session and session['user'] == os.environ.get('ADMIN_USERNAME')):
         if request.method == 'POST':
             title = request.form.get("title")
             tline = request.form.get("tline")
@@ -157,14 +158,14 @@ def edit_post(srno):
 
 @app.route("/dashboard", methods = ['GET', 'POST'])
 def login():
-    if ('user' in session and session['user'] == params['admin_user']) :
+    if ('user' in session and session['user'] == os.environ.get('ADMIN_USERNAME')) :
         posts = Posts.query.all()
         return render_template('dashboard.html', params= params, posts=posts)
 
     if (request.method =='POST'):
         uname = request.form.get('uname')
         upass = request.form.get('pass')
-        if (uname == params['admin_user'] and upass == params['admin_pass']):
+        if (uname == os.environ.get('ADMIN_USERNAME') and upass == os.environ.get('ADMIN_PASSWORD')):
             session['user'] = uname
             posts = Posts.query.all()
             return render_template('dashboard.html', params= params, posts=posts)
@@ -180,7 +181,7 @@ def fetch_post(post_slug):
 
 @app.route("/delete/<string:srno>", methods=['GET'])
 def delete_post(srno):
-    if ('user' in session and session['user'] == params['admin_user']) :
+    if ('user' in session and session['user'] == os.environ.get('ADMIN_USERNAME')) :
         post = Posts.query.filter_by(srno=srno).first()
         db.session.delete(post)
         db.session.commit()
