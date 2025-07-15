@@ -12,6 +12,7 @@ with open('Quotify/config.json','r') as c:
     params = json.load(c)["params"] #loading the params in the variable 
 
 app = Flask(__name__)
+params['no_of_posts'] = 2
 app.secret_key = "secret-key-here"
 app.config['UPLOAD_FOLDER'] = params['upload_location']
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
