@@ -14,6 +14,24 @@ with open('Quotify/config.json','r') as c:
 app = Flask(__name__)
 app.secret_key = "secret-key-here"
 app.config['UPLOAD_FOLDER'] = params['upload_location']
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'connect_args': {
+        'ssl': {
+            # For mysqlclient, an empty 'ssl' dictionary often works to initiate TLS.
+            # If you want to explicitly ensure verification (like VERIFY_CA),
+            # you'd need the CA certificate file from Aiven and use `ca` and `verify_mode`.
+            # Example for full verification (if you downloaded aiven_ca.pem):
+            # 'ca': os.path.join(app.root_path, 'certs', 'aiven_ca.pem'),
+            # 'verify_mode': ssl.CERT_REQUIRED # Requires `import ssl` at the top
+            #
+            # For most Aiven deployments, where the connection string might have previously
+            # included `?sslmode=REQUIRED`, simply providing an empty `ssl` dict here
+            # or relying on the server's requirement for SSL often suffices once the URL param is gone.
+        }
+        # You can also set other mysqlclient options here, e.g., 'read_timeout': 10
+    }
+}
+
 app.config.update(
     MAIL_SERVER = 'smtp.gmail.com',
     MAIL_PORT = '465',
@@ -23,14 +41,18 @@ app.config.update(
 )
 mail = Mail(app)
 
-if(params['local_server']):
+if(params['local_server']== "True" ):
     app.config['SQLALCHEMY_DATABASE_URI'] = params['local_uri']
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = params['prod_uri']
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+
 
 db = SQLAlchemy(app)
 
 class Contacts(db.Model):
+    __tablename__ = 'Contacts'
     srno = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     phoneno = db.Column(db.Integer, nullable=False)
@@ -40,6 +62,7 @@ class Contacts(db.Model):
 
 
 class Posts(db.Model):
+    __tablename__ = 'Posts'
     srno = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(30), nullable=False)
     slug = db.Column(db.String(20), nullable=False)
