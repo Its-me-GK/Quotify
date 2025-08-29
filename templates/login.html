@@ -7,10 +7,10 @@
         integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 </head>
 
-<body class="d-flex align-items-center justify-content-center h-100 text-white bg-dark">
+<body class="d-flex align-items-center justify-content-center h-100 bg-dark text-white">
 
     <div class="card shadow-sm p-4 bg-dark col-12 col-md-8 col-lg-6">
-        <form class="form-signin" action="/dashboard" method="post">
+        <form class="form-signin text-center" action="/dashboard" method="post">
 
             {% set fname = 'assets/img/'+ params['login_img'] %}
             <img class="mb-4" src="{{url_for('static', filename=fname)}}" alt="" width="72" height="72">
