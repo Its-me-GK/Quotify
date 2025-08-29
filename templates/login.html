@@ -7,18 +7,18 @@
         integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 </head>
 
-<body class="d-flex align-items-center justify-content-center vh-100 text-center bg-light">
+<body class="d-flex align-items-center justify-content-center vh-100 text-center bg-dark text-white">
 
-    <div class="shadow-sm p-4 bg-dark text-white" style="width: 25rem;">
+    <div class="card shadow-sm p-4 col-10 col-md-6 col-lg-4">
         <form class="form-signin" action="/dashboard" method="post">
 
             {% set fname = 'assets/img/'+ params['login_img'] %}
             <img class="mb-4" src="{{url_for('static', filename=fname)}}" alt="" width="72" height="72">
             <h1 class="h3 mb-3 font-weight-normal">Admin Login</h1>
             <label for="uname" class="sr-only">Username</label>
-            <input type="text" id="uname" name="uname" class="form-control" placeholder="Username" required autofocus>
+            <input type="text" id="uname" name="uname" class="form-control bg-light text-dark" placeholder="Username" required autofocus>
             <label for="password" class="sr-only">Password</label>
-            <input type="password" id="password" name="pass" class="form-control" placeholder="Password" required>
+            <input type="password" id="password" name="pass" class="form-control bg-light text-dark" placeholder="Password" required>
             <div class="checkbox my-3">
                 <label>
                     <input type="checkbox" value="remember-me"> Remember me
