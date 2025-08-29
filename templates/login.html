@@ -8,22 +8,22 @@
 
 <body class="d-flex align-items-center justify-content-center vh-100 text-center bg-light">
 
-  <div class="card shadow-sm p-4" style="width: 25rem;">
+  <div class="container shadow-sm p-4 bg-dark text-white" style="width: 25rem;">
     <form class="form-signin" action="/dashboard" method="post">
 
       {% set fname = 'assets/img/'+ params['login_img'] %}
       <img class="mb-4" src="{{url_for('static', filename=fname)}}" alt="" width="72" height="72">
       <h1 class="h3 mb-3 font-weight-normal">Admin Login</h1>
-      <label for="uname" class="sr-only">Username</label>
-      <input type="text" id="uname" name="uname" class="form-control" placeholder="Username" required autofocus>
-      <label for="password" class="sr-only">Password</label>
-      <input type="password" id="password" name="pass" class="form-control" placeholder="Password" required>
+      <label for="uname" class="sr-only p-2">Username</label>
+      <input type="text" id="uname" name="uname" class="form-control p-2" placeholder="Username" required autofocus>
+      <label for="password" class="sr-only p-2">Password</label>
+      <input type="password" id="password" name="pass" class="form-control p-2" placeholder="Password" required>
       <div class="checkbox my-3">
         <label>
           <input type="checkbox" value="remember-me"> Remember me
         </label>
       </div>
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+      <button class="btn btn-lg btn-primary btn-block p-2" type="submit">Sign in</button>
       <p class="mt-5 mb-3 text-muted">© {{params['blog_name'] }} 2024-25</p>
 
     </form>
