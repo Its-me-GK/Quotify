@@ -10,8 +10,8 @@ SAMPLE_POSTS = [
             "one useful step today, and let consistency do the rest."
         ),
         "tagline": "Small steps matter.",
-        "date": "24 September 2026",
-        "img_file": "post-sample-image.jpg",
+        "date": "2026-09-24",
+        "img_file": "post-bg.jpg",
     },
     {
         "title": "Keep Moving Forward",
@@ -22,8 +22,8 @@ SAMPLE_POSTS = [
             "tomorrow with confidence."
         ),
         "tagline": "Progress over perfection.",
-        "date": "24 September 2026",
-        "img_file": "post-sample-image.jpg",
+        "date": "2026-09-24",
+        "img_file": "post-bg.jpg",
     },
     {
         "title": "Believe in Yourself",
@@ -34,8 +34,8 @@ SAMPLE_POSTS = [
             "to become better."
         ),
         "tagline": "Trust your process.",
-        "date": "24 September 2026",
-        "img_file": "post-sample-image.jpg",
+        "date": "2026-09-24",
+        "img_file": "post-bg.jpg",
     },
 ]
 
@@ -44,7 +44,7 @@ SAMPLE_CONTACTS = [
         "name": "Demo Visitor",
         "phoneno": "9999999999",
         "message": "Sample contact record created by the Quotify seed script.",
-        "date": "24 September 2026",
+        "date": "2026-09-24",
         "email": "demo@example.com",
     },
 ]
