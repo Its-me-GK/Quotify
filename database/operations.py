@@ -1,15 +1,16 @@
 """Database lifecycle operations.
 
-These helpers are used by dedicated scripts and are never called from request
-handlers or application startup.
+These helpers are used by dedicated scripts and the protected production
+bootstrap endpoint. They are never called from application startup.
 """
 
 from collections.abc import Iterable
+from datetime import datetime, timezone
 
 from sqlalchemy import inspect
 from sqlalchemy.exc import SQLAlchemyError
 
-from main import Contacts, Posts, db
+from main import BootstrapRuns, Contacts, Posts, db
 
 
 def initialize_schema() -> list[str]:
@@ -47,3 +48,41 @@ def seed_records(posts: Iterable[dict], contacts: Iterable[dict]) -> dict[str, i
         raise
 
     return {"posts": inserted_posts, "contacts": inserted_contacts}
+
+
+def bootstrap_production_database(posts: Iterable[dict], contacts: Iterable[dict]) -> dict:
+    """Run the explicit one-time production bootstrap workflow."""
+    inspector = inspect(db.engine)
+    tables_before = set(inspector.get_table_names())
+
+    tables_after = set(initialize_schema())
+    tables_created = sorted(tables_after - tables_before)
+
+    completed_run = BootstrapRuns.query.order_by(BootstrapRuns.id.asc()).first()
+    if completed_run is not None:
+        return {
+            "status": "already_completed",
+            "tables_created": [],
+            "seeded": {"posts": 0, "contacts": 0},
+            "completed_at": completed_run.completed_at,
+        }
+
+    counts = seed_records(posts, contacts)
+    completed_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    summary = f"posts={counts['posts']};contacts={counts['contacts']}"
+
+    try:
+        db.session.add(
+            BootstrapRuns(completed_at=completed_at, result_summary=summary)
+        )
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        raise
+
+    return {
+        "status": "completed",
+        "tables_created": tables_created,
+        "seeded": counts,
+        "completed_at": completed_at,
+    }
