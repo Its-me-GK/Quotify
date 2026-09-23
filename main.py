@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, session, redirect
+from flask import Flask, render_template, request, session, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import hmac
 import json
 from flask_mail import Mail
 import os
@@ -78,12 +79,86 @@ class Posts(db.Model):
     date = db.Column(db.String(12), nullable=True)
     img_file = db.Column(db.String(15), nullable=True)
 
+class BootstrapRuns(db.Model):
+    __tablename__ = 'BootstrapRuns'
+    id = db.Column(db.Integer, primary_key=True)
+    completed_at = db.Column(db.String(32), nullable=False)
+    result_summary = db.Column(db.String(255), nullable=False)
+
 @app.after_request
 def add_security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     return response
+
+
+def _is_vercel_production() -> bool:
+    return params['local_server'] != "True" and os.environ.get('VERCEL_ENV') == 'production'
+
+
+def _bootstrap_token_from_request() -> str:
+    auth_header = request.headers.get('Authorization', '')
+    if auth_header.startswith('Bearer '):
+        return auth_header.removeprefix('Bearer ').strip()
+    return request.headers.get('X-Bootstrap-Token', '').strip()
+
+
+def _bootstrap_response(payload: dict, status_code: int):
+    response = jsonify(payload)
+    response.status_code = status_code
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+
+@app.route("/admin/bootstrap-db", methods=['POST'])
+def bootstrap_db():
+    if not _is_vercel_production():
+        return _bootstrap_response(
+            {
+                'ok': False,
+                'status': 'blocked',
+                'reason': 'Production bootstrap is only available on Vercel production deployments.',
+            },
+            403,
+        )
+
+    expected_token = os.environ.get('DB_BOOTSTRAP_TOKEN', '').strip()
+    if len(expected_token) < 32:
+        return _bootstrap_response(
+            {
+                'ok': False,
+                'status': 'not_configured',
+                'reason': 'DB_BOOTSTRAP_TOKEN is not configured with a strong production-only value.',
+            },
+            503,
+        )
+
+    supplied_token = _bootstrap_token_from_request()
+    if not supplied_token or not hmac.compare_digest(supplied_token, expected_token):
+        return _bootstrap_response(
+            {
+                'ok': False,
+                'status': 'forbidden',
+                'reason': 'A valid bootstrap token is required.',
+            },
+            403,
+        )
+
+    from database.operations import bootstrap_production_database
+    from database.sample_data import SAMPLE_CONTACTS, SAMPLE_POSTS
+
+    result = bootstrap_production_database(SAMPLE_POSTS, SAMPLE_CONTACTS)
+    return _bootstrap_response(
+        {
+            'ok': True,
+            'status': result['status'],
+            'tables_created': result['tables_created'],
+            'seeded': result['seeded'],
+            'completed_at': result['completed_at'],
+        },
+        200,
+    )
 
 @app.route("/")
 def home():
