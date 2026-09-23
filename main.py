@@ -147,8 +147,21 @@ def bootstrap_db():
 
     from database.operations import bootstrap_production_database
     from database.sample_data import SAMPLE_CONTACTS, SAMPLE_POSTS
+    from sqlalchemy.exc import SQLAlchemyError
 
-    result = bootstrap_production_database(SAMPLE_POSTS, SAMPLE_CONTACTS)
+    try:
+        result = bootstrap_production_database(SAMPLE_POSTS, SAMPLE_CONTACTS)
+    except SQLAlchemyError:
+        app.logger.exception('Production database bootstrap failed')
+        return _bootstrap_response(
+            {
+                'ok': False,
+                'status': 'database_error',
+                'reason': 'The bootstrap operation failed. Check Vercel runtime logs for details.',
+            },
+            500,
+        )
+
     return _bootstrap_response(
         {
             'ok': True,
