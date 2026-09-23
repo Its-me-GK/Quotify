@@ -16,21 +16,16 @@ with open('config.json','r') as c: #Quotify/config.json
 app = Flask(__name__)
 app.secret_key = "secret-key-here"
 app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER')
+# Vercel runs Flask as a serverless function. Use a fresh DB connection
+# instead of keeping a SQLAlchemy connection pool between invocations.
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 280,
+    'pool_timeout': 10,
     'connect_args': {
-        'ssl': {
-            # For mysqlclient, an empty 'ssl' dictionary often works to initiate TLS.
-            # If you want to explicitly ensure verification (like VERIFY_CA),
-            # you'd need the CA certificate file from Aiven and use `ca` and `verify_mode`.
-            # Example for full verification (if you downloaded aiven_ca.pem):
-            # 'ca': os.path.join(app.root_path, 'certs', 'aiven_ca.pem'),
-            # 'verify_mode': ssl.CERT_REQUIRED # Requires `import ssl` at the top
-            #
-            # For most Aiven deployments, where the connection string might have previously
-            # included `?sslmode=REQUIRED`, simply providing an empty `ssl` dict here
-            # or relying on the server's requirement for SSL often suffices once the URL param is gone.
-        }
-        # You can also set other mysqlclient options here, e.g., 'read_timeout': 10
+        # Aiven MySQL supports TLS. Enable encrypted transport without
+        # requiring a CA file to be bundled into the deployment.
+        'ssl': {}
     }
 }
 
