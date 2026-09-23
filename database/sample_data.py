@@ -9,7 +9,7 @@ SAMPLE_POSTS = [
             "small actions repeated with patience. Start where you are, take "
             "one useful step today, and let consistency do the rest."
         ),
-        "tagline": "Small steps create meaningful change.",
+        "tagline": "Small steps matter.",
         "date": "24 September 2026",
         "img_file": "post-sample-image.jpg",
     },
@@ -21,7 +21,7 @@ SAMPLE_POSTS = [
             "focus on what you can control today, and keep moving toward "
             "tomorrow with confidence."
         ),
-        "tagline": "Progress matters more than perfection.",
+        "tagline": "Progress over perfection.",
         "date": "24 September 2026",
         "img_file": "post-sample-image.jpg",
     },
@@ -33,7 +33,7 @@ SAMPLE_POSTS = [
             "goal, do the work, learn from mistakes, and give yourself time "
             "to become better."
         ),
-        "tagline": "Trust the process and keep learning.",
+        "tagline": "Trust your process.",
         "date": "24 September 2026",
         "img_file": "post-sample-image.jpg",
     },
