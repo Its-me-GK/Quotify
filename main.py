@@ -9,6 +9,8 @@ import math
 import ssl
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+from sqlalchemy import text as sql_text
+from sqlalchemy.exc import SQLAlchemyError
 
 load_dotenv()
 
@@ -109,6 +111,34 @@ def _bootstrap_response(payload: dict, status_code: int):
     response.status_code = status_code
     response.headers['Cache-Control'] = 'no-store'
     return response
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    """Liveness check: confirms the Flask function is responding without DB I/O."""
+    response = jsonify({"status": "ok", "service": "quotify"})
+    response.headers["Cache-Control"] = "no-store"
+    return response, 200
+
+
+@app.route("/health/db", methods=["GET"])
+def database_health():
+    """Readiness check: execute a bounded, read-only query against MySQL."""
+    try:
+        db.session.execute(sql_text("SELECT 1")).scalar_one()
+        return _bootstrap_response(
+            {"status": "ok", "database": "reachable"},
+            200,
+        )
+    except SQLAlchemyError:
+        db.session.rollback()
+        app.logger.warning("Database health check failed")
+        return _bootstrap_response(
+            {"status": "unavailable", "database": "unreachable"},
+            503,
+        )
+    finally:
+        db.session.remove()
 
 
 @app.route("/admin/bootstrap-db", methods=['POST'])
